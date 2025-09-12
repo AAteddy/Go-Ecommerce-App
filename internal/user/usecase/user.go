@@ -19,7 +19,13 @@ type UserUseCase struct {
 	log           *logging.Logger
 }
 
-func NewUserUseCase(repo UserRepository, TokenStore TokenStore, eventProducer EventProducer, JwtSecret string, log *logging.Logger) *UserUseCase {
+func NewUserUseCase(
+	repo UserRepository, 
+	TokenStore TokenStore, 
+	eventProducer EventProducer, 
+	JwtSecret string, 
+	log *logging.Logger,
+	) *UserUseCase {
 	return &UserUseCase{repo, TokenStore, eventProducer, JwtSecret, log}
 }
 

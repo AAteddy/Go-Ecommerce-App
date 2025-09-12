@@ -8,6 +8,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 
+	"github.com/AAteddy/go-ecommerce-app/internal/pkg/dto"
 	"github.com/AAteddy/go-ecommerce-app/internal/pkg/errors"
 	"github.com/AAteddy/go-ecommerce-app/internal/pkg/logging"
 	"github.com/AAteddy/go-ecommerce-app/internal/user/usecase"
@@ -46,14 +47,28 @@ func AuthMiddleware(usecase *usecase.UserUseCase) func(next http.Handler) http.H
 			}, jwt.WithLeeway(5*time.Second))
 			if err != nil || !token.Valid {
 				log.Error("Invalid token ", "error ", err)
-				http.Error(w, "Unauthorized", http.StatusUnauthorized)
+				response := dto.ApiResponse{
+					StatusCode: http.StatusUnauthorized,
+					Message:    "Unauthorized",
+					Error:      "Invalid or missing token",
+					Data:       nil,
+				}
+
+				writeResponse(w, response)
 				return
 			}
 
 			claims, ok := token.Claims.(jwt.MapClaims)
 			if !ok {
 				log.Error("Invalid claims ")
-				http.Error(w, "Unauthorized", http.StatusUnauthorized)
+				response := dto.ApiResponse{
+					StatusCode: http.StatusUnauthorized,
+					Message:    "Unauthorized",
+					Error:      "Invalid token claims",
+					Data:       nil,
+				}
+
+				writeResponse(w, response)
 				return
 			}
 			log.Info("Token claims", "claims", claims)
@@ -61,17 +76,33 @@ func AuthMiddleware(usecase *usecase.UserUseCase) func(next http.Handler) http.H
 			userID, ok := claims["sub"].(string)
 			if !ok || userID == "" {
 				log.Error("Invalid user_id claim ")
-				http.Error(w, "Unauthorized", http.StatusUnauthorized)
+				response := dto.ApiResponse{
+					StatusCode: http.StatusUnauthorized,
+					Message:    "Unauthorized",
+					Error:      "Invalid or missing user_id in context",
+					Data:       nil,
+				}
+
+				writeResponse(w, response)
 				return
 			}
 
 			role, ok := claims["role"].(string)
 			if !ok || role == "" {
 				log.Error("Invalid role claim ")
-				http.Error(w, "Unauthorized", http.StatusUnauthorized)
+				response := dto.ApiResponse{
+					StatusCode: http.StatusUnauthorized,
+					Message:    "Unauthorized",
+					Error:      "Invalid or missing role in context",
+					Data:       nil,
+				}
+
+				writeResponse(w, response)
 				return
 			}
 
+			// Passes authenticated data (from JWT) to downstream handlers without tight coupling.
+			// WithValue creates a child context with key-value pairs (user_id, role from JWT claims).
 			ctx := context.WithValue(r.Context(), userIDKey, userID)
 			ctx = context.WithValue(ctx, roleKey, role)
 			next.ServeHTTP(w, r.WithContext(ctx))
