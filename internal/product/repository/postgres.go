@@ -19,7 +19,7 @@ func NewPostgresProductRepository(db *gorm.DB) *PostgresProductRepository {
 	return &PostgresProductRepository{db: db}
 }
 
-// implement ProductRepository.Save inserts a new product into the database.
+// implement ProducctRepository.Save inserts a new product into the database.
 func (r *PostgresProductRepository) Save(ctx context.Context, product *domain.Product) error {
 	// Save product to the database
 	return r.db.WithContext(ctx).Create(product).Error

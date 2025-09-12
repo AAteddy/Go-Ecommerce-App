@@ -5,9 +5,9 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/AAteddy/go-ecommerce-app/internal/pkg/errors"
+	productDomain "github.com/AAteddy/go-ecommerce-app/internal/product/domain"
 	"github.com/AAteddy/go-ecommerce-app/internal/user/domain"
 )
-
 
 // Migrate initializes the database connection and runs migrations for all domain models.
 func Migrate(connString string) (*gorm.DB, error) {
@@ -20,12 +20,12 @@ func Migrate(connString string) (*gorm.DB, error) {
 	if err := db.AutoMigrate(
 		&domain.User{},
 		// &domain.Order{},
-		// &domain.Product{},
+		&productDomain.Product{},
 		// &domain.Payment{},
 		// &domain.Inventory{},
-		); err != nil {
+	); err != nil {
 		return nil, errors.Wrap(err, "failed to run database migrations")
 	}
-	
+
 	return db, nil
 }

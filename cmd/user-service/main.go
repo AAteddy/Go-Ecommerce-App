@@ -20,7 +20,7 @@ func main() {
 
 	log.Info("Initializing User Service")
 
-	dbConn, err := db.NewPostgresDB(cfg.DBURL)
+	dbConn, err := db.NewPostgresDB(cfg.DBURL) // migrates all tables
 	if err != nil {
 		log.Fatal("Failed to connect to database", "error", err)
 	}
