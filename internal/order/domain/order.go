@@ -11,8 +11,8 @@ import (
 // Order represents an e-commerce order.
 type Order struct {
 	ID         uuid.UUID   `json:"id" gorm:"type:uuid;primaryKey;default:gen_random_uuid()"`
-	UserID     uuid.UUID   `json:"user_id" gorm:"type:uuid;not null;index"`
-	ProductIDs []uuid.UUID `json:"product_ids" gorm:"type:uuid[]"`
+	UserID     uuid.UUID   `json:"user_id" gorm:"type:uuid;not null"`
+	ProductIDs []uuid.UUID `json:"product_ids" gorm:"type:uuid[]; not null"`
 	Quantity   int         `json:"quantity" gorm:"not null"`
 	Total      float64     `json:"total" gorm:"type:decimal(10,2);not null;default:0.00"`
 	Status     string      `json:"status" gorm:"size:50;not null;default:'pending'"`
