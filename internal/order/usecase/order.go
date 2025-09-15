@@ -19,26 +19,42 @@ func NewOrderUseCase(repo OrderRepository, log *logging.Logger) *OrderUseCase {
 }
 
 type CreateOrderRequest struct {
-	UserID     uuid.UUID   `json:"user_id"`
-	ProductIDs []uuid.UUID `json:"product_ids"`
-	Quantity   int         `json:"quantity"`
-	Total      float64     `json:"total"`
+	UserID     string   `json:"user_id"`
+	ProductIDs []string `json:"product_ids"`
+	Quantity   int      `json:"quantity"`
+	Total      float64  `json:"total"`
 }
 
-func (uc *OrderUseCase) CreateOrder(ctx context.Context, req CreateOrderRequest) (*domain.Order, error) {
+func (uc *OrderUseCase) CreateOrder(ctx context.Context, req CreateOrderRequest) (string, error) {
 	uc.log.Info("Creating new order for user ", "user_id ", req.UserID)
-	order, err := domain.NewOrder(req.UserID, req.ProductIDs, req.Total, req.Quantity)
+	userID, err := uuid.Parse(req.UserID)
+	if err != nil {
+		uc.log.Error("Invalid user ID", "error", err)
+		return "", errors.ErrInvalidInput
+	}
+
+	var productIDs []uuid.UUID
+	for _, pid := range req.ProductIDs {
+		pidUUID, err := uuid.Parse(pid)
+		if err != nil {
+			uc.log.Error("Invalid product ID", "error", err)
+			return "", errors.ErrInvalidInput
+		}
+		productIDs = append(productIDs, pidUUID)
+	}
+
+	order, err := domain.NewOrder(userID, productIDs, req.Total, req.Quantity)
 	if err != nil {
 		uc.log.Error("Failed to create order", "error", err)
-		return nil, err
+		return "", err
 	}
 
 	if err := uc.repo.Save(ctx, order); err != nil {
 		uc.log.Error("Failed to save order", "error", err)
-		return nil, errors.Wrap(err, "Failed to save order")
+		return "", errors.Wrap(err, "Failed to save order")
 	}
 
-	return order, nil
+	return order.ID.String(), nil
 }
 
 func (uc *OrderUseCase) GetOrderByID(ctx context.Context, id string) (*domain.Order, error) {
