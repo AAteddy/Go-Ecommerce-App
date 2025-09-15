@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"time"
 
 	"gorm.io/gorm"
 
@@ -50,4 +51,24 @@ func (r *PostgresPaymentRepository) FindByOrderID(ctx context.Context, orderID s
 	}
 
 	return &payment, nil
+}
+
+func (r *PostgresPaymentRepository) UpdateStatus(ctx context.Context, id string, status string) (*domain.Payment, error) {
+	var existing domain.Payment
+	if err := r.db.WithContext(ctx).Where("id = ?", id).First(&existing).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, errors.ErrNotFound
+		}
+
+		return nil, errors.Wrap(err, "failed to find payment by id")
+	}
+
+	existing.Status = status
+	existing.UpdatedAt = time.Now()
+
+	if err := r.db.WithContext(ctx).Save(&existing).Error; err != nil {
+		return nil, errors.Wrap(err, "failed to update payment status")
+	}
+
+	return &existing, nil
 }

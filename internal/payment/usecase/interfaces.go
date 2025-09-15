@@ -1,4 +1,4 @@
-package repository
+package usecase
 
 import (
 	"context"
@@ -10,6 +10,5 @@ type PaymentRepository interface {
 	Save(ctx context.Context, payment *domain.Payment) error
 	FindByID(ctx context.Context, id string) (*domain.Payment, error)
 	FindByOrderID(ctx context.Context, orderID string) (*domain.Payment, error)
-	// FindByUserID(ctx context.Context, userID string) ([]*domain.Payment, error)
 	UpdateStatus(ctx context.Context, id string, status string) (*domain.Payment, error)
 }

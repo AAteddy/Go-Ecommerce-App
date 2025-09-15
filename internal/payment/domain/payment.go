@@ -24,9 +24,11 @@ func NewPayment(orderID uuid.UUID, amount float64) (*Payment, error) {
 	}
 
 	return &Payment{
-		ID:      uuid.New(),
-		OrderID: orderID,
-		Amount:  amount,
-		Status:  "pending",
+		ID:        uuid.New(),
+		OrderID:   orderID,
+		Amount:    amount,
+		Status:    "pending",
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	}, nil
 }
