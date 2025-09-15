@@ -10,10 +10,10 @@ import (
 
 type ProductUseCase struct {
 	repo ProductRepository
-	log  logging.Logger
+	log  *logging.Logger
 }
 
-func NewProductUseCase(repo ProductRepository, log logging.Logger) *ProductUseCase {
+func NewProductUseCase(repo ProductRepository, log *logging.Logger) *ProductUseCase {
 	return &ProductUseCase{repo, log}
 }
 
