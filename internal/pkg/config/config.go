@@ -9,12 +9,13 @@ import (
 
 // Config holds the environment variable's configuration values for the application.
 type Config struct {
-	HTTPPort    string
+	HTTPPort        string
 	ProductHTTPPort string
-	DBURL       string
-	KafkaBroker string
-	RedisAddr   string
-	JWTSecret   string
+	OrderHTTPPort   string
+	DBURL           string
+	KafkaBroker     string
+	RedisAddr       string
+	JWTSecret       string
 }
 
 // LoadConfig loads the environment variables from the .env file.
@@ -28,12 +29,13 @@ func LoadConfig() Config {
 		}
 	}
 	cfg := Config{
-		HTTPPort:    getEnv("HTTP_PORT", ":8080"),
+		HTTPPort:        getEnv("HTTP_PORT", ":8080"),
 		ProductHTTPPort: getEnv("ProductHTTP_PORT", ":8081"),
-		DBURL:       getEnv("DB_URL", "postgres://user:password@postgres:5432/ecommerce_db?sslmode=disable"),
-		KafkaBroker: getEnv("KAFKA_BROKER", "kafka:9092"),
-		RedisAddr:   getEnv("REDIS_ADDR", "redis:6379"),
-		JWTSecret:   getEnv("JWT_SECRET", ""),
+		OrderHTTPPort:   getEnv("OrderHTTP_PORT", ":8082"),
+		DBURL:           getEnv("DB_URL", "postgres://user:password@postgres:5432/ecommerce_db?sslmode=disable"),
+		KafkaBroker:     getEnv("KAFKA_BROKER", "kafka:9092"),
+		RedisAddr:       getEnv("REDIS_ADDR", "redis:6379"),
+		JWTSecret:       getEnv("JWT_SECRET", ""),
 	}
 
 	// Validate required fields
