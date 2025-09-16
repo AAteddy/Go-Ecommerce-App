@@ -14,20 +14,23 @@ import (
 	"github.com/AAteddy/go-ecommerce-app/internal/pkg/dto"
 	customErrors "github.com/AAteddy/go-ecommerce-app/internal/pkg/errors"
 	"github.com/AAteddy/go-ecommerce-app/internal/pkg/logging"
+	"github.com/AAteddy/go-ecommerce-app/internal/pkg/middleware"
+	UserUC "github.com/AAteddy/go-ecommerce-app/internal/user/usecase"
 )
 
 type OrderHandler struct {
-	uc  *usecase.OrderUseCase
-	log *logging.Logger
+	uc     *usecase.OrderUseCase
+	userUC *UserUC.UserUseCase
+	log    *logging.Logger
 }
 
-func NewOrderHandler(uc *usecase.OrderUseCase, log *logging.Logger) *OrderHandler {
-	return &OrderHandler{uc, log}
+func NewOrderHandler(uc *usecase.OrderUseCase, userUC *UserUC.UserUseCase, log *logging.Logger) *OrderHandler {
+	return &OrderHandler{uc, userUC, log}
 }
 
 func (h *OrderHandler) RegisterRoutes(r chi.Router) {
-	r.Post("/create_order", h.CreateOrder)
-	r.Get("/get_order/{order_id}", h.GetOrderByID)
+	r.With(middleware.AuthMiddleware(h.userUC, h.log)).Post("/create_order", h.CreateOrder)
+	r.With(middleware.AuthMiddleware(h.userUC, h.log)).Get("/get_order/{order_id}", h.GetOrderByID)
 }
 
 func (h *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {

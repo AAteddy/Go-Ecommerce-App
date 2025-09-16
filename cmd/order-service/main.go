@@ -11,6 +11,9 @@ import (
 	"github.com/AAteddy/go-ecommerce-app/internal/pkg/config"
 	"github.com/AAteddy/go-ecommerce-app/internal/pkg/db"
 	"github.com/AAteddy/go-ecommerce-app/internal/pkg/logging"
+	"github.com/AAteddy/go-ecommerce-app/internal/user/infrastructure/redis"
+	userRepo "github.com/AAteddy/go-ecommerce-app/internal/user/repository"
+	UserUC "github.com/AAteddy/go-ecommerce-app/internal/user/usecase"
 )
 
 func main() {
@@ -24,11 +27,15 @@ func main() {
 		log.Fatal("Failed to connect to database", "error", err)
 	}
 
+	tokenStore := redis.NewRedisTokenStore(cfg.RedisAddr)
+	userRepo := userRepo.NewPostgresUserRepository(dbConn)
+	userUseCase := UserUC.NewUserUseCase(userRepo, tokenStore, nil, cfg.JWTSecret, log) // nil for repo, tokenStore, kafka (stubbed)
+
 	repo := repository.NewPostgresOrderRepository(dbConn)
 	usecase := usecase.NewOrderUseCase(repo, log)
 
 	route := chi.NewRouter()
-	handler := orderHttp.NewOrderHandler(usecase, log)
+	handler := orderHttp.NewOrderHandler(usecase, userUseCase, log)
 	handler.RegisterRoutes(route)
 
 	log.Info("Starting order service on port: " + cfg.OrderHTTPPort)

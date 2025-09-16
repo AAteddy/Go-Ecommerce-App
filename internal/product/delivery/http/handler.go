@@ -12,25 +12,28 @@ import (
 	"github.com/AAteddy/go-ecommerce-app/internal/pkg/dto"
 	customErrors "github.com/AAteddy/go-ecommerce-app/internal/pkg/errors"
 	"github.com/AAteddy/go-ecommerce-app/internal/pkg/logging"
+	"github.com/AAteddy/go-ecommerce-app/internal/pkg/middleware"
 	"github.com/AAteddy/go-ecommerce-app/internal/product/domain"
 	"github.com/AAteddy/go-ecommerce-app/internal/product/usecase"
+	UserUC "github.com/AAteddy/go-ecommerce-app/internal/user/usecase"
 )
 
 type ProductHandler struct {
-	uc  *usecase.ProductUseCase
-	log *logging.Logger
+	uc     *usecase.ProductUseCase
+	userUC *UserUC.UserUseCase
+	log    *logging.Logger
 }
 
-func NewProductHandler(uc *usecase.ProductUseCase, log *logging.Logger) *ProductHandler {
-	return &ProductHandler{uc, log}
+func NewProductHandler(uc *usecase.ProductUseCase, userUC *UserUC.UserUseCase, log *logging.Logger) *ProductHandler {
+	return &ProductHandler{uc, userUC, log}
 }
 
 func (h *ProductHandler) RegisterRoutes(r chi.Router) {
-	r.Post("/create_product", h.CreateProduct)
-	r.Get("/products/{id}", h.GetProductByID)
-	r.Get("/products", h.ListProducts)
-	r.Post("/update_product/{id}", h.UpdateProduct)
-	r.Post("/delete_product/{id}", h.DeleteProduct)
+	r.With(middleware.AuthMiddleware(h.userUC, h.log)).Post("/create_product", h.CreateProduct)
+	r.With(middleware.AuthMiddleware(h.userUC, h.log)).Get("/products/{id}", h.GetProductByID)
+	r.With(middleware.AuthMiddleware(h.userUC, h.log)).Get("/products", h.ListProducts)
+	r.With(middleware.AuthMiddleware(h.userUC, h.log)).Post("/update_product/{id}", h.UpdateProduct)
+	r.With(middleware.AuthMiddleware(h.userUC, h.log)).Post("/delete_product/{id}", h.DeleteProduct)
 }
 
 func (h *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
