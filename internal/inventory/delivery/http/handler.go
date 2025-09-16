@@ -14,21 +14,24 @@ import (
 	"github.com/AAteddy/go-ecommerce-app/internal/pkg/dto"
 	customErrors "github.com/AAteddy/go-ecommerce-app/internal/pkg/errors"
 	"github.com/AAteddy/go-ecommerce-app/internal/pkg/logging"
+	"github.com/AAteddy/go-ecommerce-app/internal/pkg/middleware"
+	UserUC "github.com/AAteddy/go-ecommerce-app/internal/user/usecase"
 )
 
 type InventoryHandler struct {
-	uc  *usecase.InventoryUseCase
-	log *logging.Logger
+	uc     *usecase.InventoryUseCase
+	userUC *UserUC.UserUseCase
+	log    *logging.Logger
 }
 
-func NewInventoryHandler(uc *usecase.InventoryUseCase, log *logging.Logger) *InventoryHandler {
-	return &InventoryHandler{uc, log}
+func NewInventoryHandler(uc *usecase.InventoryUseCase, userUC *UserUC.UserUseCase, log *logging.Logger) *InventoryHandler {
+	return &InventoryHandler{uc, userUC, log}
 }
 
 func (h *InventoryHandler) RegisterRoutes(r chi.Router) {
-	r.Post("/create_inventory", h.CreateInventory)
-	r.Get("/get_inventory/{inventory_id}", h.GetInventoryByID)
-	r.Get("/get_inventory/product/{product_id}", h.GetInventoryByProductID)
+	r.With(middleware.AuthMiddleware(h.userUC, h.log)).Post("/create_inventory", h.CreateInventory)
+	r.With(middleware.AuthMiddleware(h.userUC, h.log)).Get("/get_inventory/{inventory_id}", h.GetInventoryByID)
+	r.With(middleware.AuthMiddleware(h.userUC, h.log)).Get("/get_inventory/product/{product_id}", h.GetInventoryByProductID)
 	// r.Get("/list_inventories", h.ListInventories)
 	// r.Put("/update_inventory/{inventory_id}", h.UpdateInventory)
 	// r.Delete("/delete_inventory/{inventory_id}", h.DeleteInventory)
