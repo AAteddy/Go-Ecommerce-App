@@ -9,7 +9,7 @@ import (
 
 // Config holds the environment variable's configuration values for the application.
 type Config struct {
-	HTTPPort          string
+	UserHTTPPort      string
 	ProductHTTPPort   string
 	OrderHTTPPort     string
 	PaymentHTTPPort   string
@@ -31,7 +31,7 @@ func LoadConfig() Config {
 		}
 	}
 	cfg := Config{
-		HTTPPort:          getEnv("HTTP_PORT", ":8080"),
+		UserHTTPPort:      getEnv("UserHTTP_PORT", ":8080"),
 		ProductHTTPPort:   getEnv("ProductHTTP_PORT", ":8081"),
 		OrderHTTPPort:     getEnv("OrderHTTP_PORT", ":8082"),
 		PaymentHTTPPort:   getEnv("PaymentHTTP_PORT", ":8084"),

@@ -3,8 +3,6 @@ package usecase
 import (
 	"context"
 
-	"github.com/google/uuid"
-
 	"github.com/AAteddy/go-ecommerce-app/internal/inventory/domain"
 	"github.com/AAteddy/go-ecommerce-app/internal/pkg/errors"
 	"github.com/AAteddy/go-ecommerce-app/internal/pkg/logging"
@@ -24,13 +22,13 @@ type CreateInventoryRequest struct {
 	Stock     int    `json:"stock"`
 }
 
-func (uc *InventoryUseCase) CreateInventory(ctx context.Context, req CreateInventoryRequest) (string, error) {
+func (uc *InventoryUseCase) Create(ctx context.Context, req CreateInventoryRequest) (string, error) {
 	uc.log.Info("Creating new inventory for product ", "product_id ", req.ProductID)
-	productID, err := uuid.Parse(req.ProductID)
-	if err != nil {
-		uc.log.Error("Invalid product ID", "error", err)
-		return "", errors.ErrInvalidInput
-	}
+	productID := req.ProductID
+	// if err != nil {
+	// 	uc.log.Error("Invalid product ID", "error", err)
+	// 	return "", errors.ErrInvalidInput
+	// }
 
 	// var inventory *domain.Inventory
 	inventory, err := domain.NewInventory(productID, req.Stock)

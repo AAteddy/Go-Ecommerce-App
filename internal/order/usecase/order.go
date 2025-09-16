@@ -6,7 +6,6 @@ import (
 	"github.com/AAteddy/go-ecommerce-app/internal/order/domain"
 	"github.com/AAteddy/go-ecommerce-app/internal/pkg/errors"
 	"github.com/AAteddy/go-ecommerce-app/internal/pkg/logging"
-	"github.com/google/uuid"
 )
 
 type OrderUseCase struct {
@@ -27,21 +26,17 @@ type CreateOrderRequest struct {
 
 func (uc *OrderUseCase) CreateOrder(ctx context.Context, req CreateOrderRequest) (string, error) {
 	uc.log.Info("Creating new order for user ", "user_id ", req.UserID)
-	userID, err := uuid.Parse(req.UserID)
-	if err != nil {
-		uc.log.Error("Invalid user ID", "error", err)
-		return "", errors.ErrInvalidInput
-	}
+	userID := req.UserID
+	productIDs := req.ProductIDs
 
-	var productIDs []uuid.UUID
-	for _, pid := range req.ProductIDs {
-		pidUUID, err := uuid.Parse(pid)
-		if err != nil {
-			uc.log.Error("Invalid product ID", "error", err)
-			return "", errors.ErrInvalidInput
-		}
-		productIDs = append(productIDs, pidUUID)
-	}
+	// for _, pid := range req.ProductIDs {
+	// 	pidUUID, err := uuid.Parse(pid)
+	// 	if err != nil {
+	// 		uc.log.Error("Invalid product ID", "error", err)
+	// 		return "", errors.ErrInvalidInput
+	// 	}
+	// 	productIDs = append(productIDs, pidUUID)
+	// }
 
 	order, err := domain.NewOrder(userID, productIDs, req.Total, req.Quantity)
 	if err != nil {

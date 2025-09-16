@@ -65,13 +65,14 @@ func (r *PostgresProductRepository) Update(ctx context.Context, id string, produ
 	existing.Name = product.Name
 	existing.Price = product.Price
 	existing.Description = product.Description
+	existing.Stock = product.Stock
 
 	// save the updated product
 	result := r.db.WithContext(ctx).Model(&existing).Updates(existing)
 	if result.Error != nil {
 		return nil, errors.Wrap(result.Error, "failed to update product")
 	}
-	
+
 	return &existing, nil
 }
 

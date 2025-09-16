@@ -10,6 +10,7 @@ import (
 	"github.com/AAteddy/go-ecommerce-app/internal/pkg/dto"
 	customErrors "github.com/AAteddy/go-ecommerce-app/internal/pkg/errors"
 	"github.com/AAteddy/go-ecommerce-app/internal/pkg/logging"
+	"github.com/AAteddy/go-ecommerce-app/internal/pkg/middleware"
 	"github.com/AAteddy/go-ecommerce-app/internal/user/usecase"
 	"golang.org/x/sync/errgroup"
 )
@@ -26,7 +27,7 @@ func NewUserHandler(usecase *usecase.UserUseCase, log *logging.Logger) *UserHand
 func (h *UserHandler) RegisterRoutes(r chi.Router) {
 	r.Post("/register", h.Register)
 	r.Post("/login", h.Login)
-	r.With(AuthMiddleware(h.usecase)).Get("/profile", h.GetProfile)
+	r.With(middleware.AuthMiddleware(h.usecase, h.log)).Get("/profile", h.GetProfile)
 }
 
 func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
@@ -145,7 +146,7 @@ func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 func (h *UserHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
 	// retrieves JWT data from middleware, enabling authorization without globals.
 	// Extract user_id and role from context (set by AuthMiddleware)
-	userID, ok := r.Context().Value(userIDKey).(string)
+	userID, ok := r.Context().Value(middleware.UserIDKey).(string)
 	if !ok || userID == "" {
 		h.log.Error("Invalid or missing user_id in context")
 		response := dto.ApiResponse{
@@ -159,7 +160,7 @@ func (h *UserHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	role, ok := r.Context().Value(roleKey).(string)
+	role, ok := r.Context().Value(middleware.RoleKey).(string)
 	if !ok || role == "" {
 		h.log.Error("Invalid or missing role in context")
 		response := dto.ApiResponse{
