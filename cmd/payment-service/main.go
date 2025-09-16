@@ -11,6 +11,9 @@ import (
 	"github.com/AAteddy/go-ecommerce-app/internal/pkg/config"
 	"github.com/AAteddy/go-ecommerce-app/internal/pkg/db"
 	"github.com/AAteddy/go-ecommerce-app/internal/pkg/logging"
+	"github.com/AAteddy/go-ecommerce-app/internal/user/infrastructure/redis"
+	userRepo "github.com/AAteddy/go-ecommerce-app/internal/user/repository"
+	UserUC "github.com/AAteddy/go-ecommerce-app/internal/user/usecase"
 )
 
 func main() {
@@ -24,11 +27,15 @@ func main() {
 		log.Error("Failed to connect and migrate database", "error", err)
 	}
 
+	tokenStore := redis.NewRedisTokenStore(cfg.RedisAddr)
+	userRepo := userRepo.NewPostgresUserRepository(dbConn)
+	userUseCase := UserUC.NewUserUseCase(userRepo, tokenStore, nil, cfg.JWTSecret, log)
+
 	repo := repository.NewPostgresPaymentRepository(dbConn)
 	usecase := usecase.NewPaymentUseCase(repo, log)
 
 	route := chi.NewRouter()
-	handler := paymentHttp.NewPaymentHandler(usecase, log)
+	handler := paymentHttp.NewPaymentHandler(usecase, userUseCase, log)
 	handler.RegisterRoutes(route)
 
 	log.Info("Starting payment service on port: " + cfg.PaymentHTTPPort)

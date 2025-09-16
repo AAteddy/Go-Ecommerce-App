@@ -14,22 +14,25 @@ import (
 	"github.com/AAteddy/go-ecommerce-app/internal/pkg/dto"
 	customErrors "github.com/AAteddy/go-ecommerce-app/internal/pkg/errors"
 	"github.com/AAteddy/go-ecommerce-app/internal/pkg/logging"
+	"github.com/AAteddy/go-ecommerce-app/internal/pkg/middleware"
+	UserUC "github.com/AAteddy/go-ecommerce-app/internal/user/usecase"
 )
 
 type PaymentHandler struct {
-	uc  *usecase.PaymentUseCase
-	log *logging.Logger
+	uc     *usecase.PaymentUseCase
+	userUC *UserUC.UserUseCase
+	log    *logging.Logger
 }
 
-func NewPaymentHandler(uc *usecase.PaymentUseCase, log *logging.Logger) *PaymentHandler {
-	return &PaymentHandler{uc, log}
+func NewPaymentHandler(uc *usecase.PaymentUseCase, userUC *UserUC.UserUseCase, log *logging.Logger) *PaymentHandler {
+	return &PaymentHandler{uc, userUC, log}
 }
 
 func (h *PaymentHandler) RegisterRoutes(r chi.Router) {
-	r.Post("/create_payment", h.CreatePayment)
-	r.Get("/payments/{id}", h.GetPaymentByID)
-	r.Get("/payments/order/{order_id}", h.GetPaymentByOrderID)
-	r.Post("/payments/{id}/update_status", h.UpdatePaymentStatus)
+	r.With(middleware.AuthMiddleware(h.userUC, h.log)).Post("/create_payment", h.CreatePayment)
+	r.With(middleware.AuthMiddleware(h.userUC, h.log)).Get("/payments/{id}", h.GetPaymentByID)
+	r.With(middleware.AuthMiddleware(h.userUC, h.log)).Get("/payments/order/{order_id}", h.GetPaymentByOrderID)
+	r.With(middleware.AuthMiddleware(h.userUC, h.log)).Post("/payments/{id}/update_status", h.UpdatePaymentStatus)
 }
 
 func (h *PaymentHandler) CreatePayment(w http.ResponseWriter, r *http.Request) {
