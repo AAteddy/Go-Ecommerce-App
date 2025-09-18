@@ -89,6 +89,7 @@ services:
       - KAFKA_BROKER=kafka:9092
       - REDIS_ADDR=redis:6379
       - JWT_SECRET=your-secure-secret-here-32-characters-long
+      - RUN_MIGRATIONS=true
       - TZ=UTC
     depends_on:
       postgres:
@@ -114,7 +115,11 @@ services:
       - DOCKER_ENV=product
       - TZ=UTC
     depends_on:
+      user-service:
+        condition: service_started
       postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     networks:
       - ecommerce-net
@@ -135,7 +140,11 @@ services:
       - DOCKER_ENV=order
       - TZ=UTC
     depends_on:
+      user-service:
+        condition: service_started
       postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     networks:
       - ecommerce-net
@@ -156,7 +165,11 @@ services:
       - DOCKER_ENV=payment
       - TZ=UTC
     depends_on:
+      user-service:
+        condition: service_started
       postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     networks:
       - ecommerce-net
@@ -177,7 +190,11 @@ services:
       - DOCKER_ENV=inventory
       - TZ=UTC
     depends_on:
+      user-service:
+        condition: service_started
       postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     networks:
       - ecommerce-net

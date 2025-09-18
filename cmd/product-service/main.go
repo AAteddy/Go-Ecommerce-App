@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"os"
 
 	"github.com/go-chi/chi/v5"
 
@@ -9,6 +10,7 @@ import (
 	"github.com/AAteddy/go-ecommerce-app/internal/pkg/db"
 	"github.com/AAteddy/go-ecommerce-app/internal/pkg/logging"
 	productHttp "github.com/AAteddy/go-ecommerce-app/internal/product/delivery/http"
+	productDB "github.com/AAteddy/go-ecommerce-app/internal/product/infrastructure/db"
 	"github.com/AAteddy/go-ecommerce-app/internal/product/repository"
 	"github.com/AAteddy/go-ecommerce-app/internal/product/usecase"
 	"github.com/AAteddy/go-ecommerce-app/internal/user/infrastructure/redis"
@@ -22,7 +24,18 @@ func main() {
 
 	log.Info("Initializing Product Service")
 
-	dbConn, err := db.Migrate(cfg.DBURL) // migrates all tables
+	if os.Getenv("RUN_MIGRATIONS") == "true" {
+		dbConn, err := db.NewPostgresDB(cfg.DBURL)
+		if err != nil {
+			log.Fatal("Failed to connect to database", "error", err)
+		}
+		if err := productDB.Migrate(dbConn); err != nil {
+			log.Fatal("Failed to run migrations", "error", err)
+		}
+		log.Info("Product schema migrations completed")
+	}
+
+	dbConn, err := db.NewPostgresDB(cfg.DBURL)
 	if err != nil {
 		log.Fatal("Failed to connect to database", "error", err)
 	}

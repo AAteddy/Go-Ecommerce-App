@@ -110,7 +110,7 @@ func (a *StringArray) UnmarshalJSON(data []byte) error {
 type Order struct {
 	ID         uuid.UUID   `json:"id" gorm:"type:uuid;primaryKey;default:gen_random_uuid()"`
 	UserID     string      `json:"user_id" gorm:"type:text;not null"`
-	ProductIDs StringArray `json:"product_ids" gorm:"type:text[]; not null"`
+	ProductIDs StringArray `json:"product_id" gorm:"type:text[]; not null"`
 	Quantity   int         `json:"quantity" gorm:"not null;default:1"`
 	Total      float64     `json:"total" gorm:"type:decimal(10,2);not null;default:0.00"`
 	Status     string      `json:"status" gorm:"size:50;not null;default:'pending'"`

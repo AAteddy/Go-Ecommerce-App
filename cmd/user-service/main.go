@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"os"
 
 	"github.com/go-chi/chi/v5"
 
@@ -11,6 +12,7 @@ import (
 	userhttp "github.com/AAteddy/go-ecommerce-app/internal/user/delivery/http"
 
 	"github.com/AAteddy/go-ecommerce-app/internal/user/infrastructure/redis"
+	userDB "github.com/AAteddy/go-ecommerce-app/internal/user/infrastructure/db"
 	"github.com/AAteddy/go-ecommerce-app/internal/user/repository"
 	"github.com/AAteddy/go-ecommerce-app/internal/user/usecase"
 )
@@ -21,7 +23,23 @@ func main() {
 
 	log.Info("Initializing User Service")
 
-	dbConn, err := db.Migrate(cfg.DBURL) // migrates all tables
+	// dbConn, err := db.Migrate(cfg.DBURL) // migrates all tables
+	// if err != nil {
+	// 	log.Fatal("Failed to connect to database", "error", err)
+	// }
+
+	if os.Getenv("RUN_MIGRATIONS") == "true" {
+		dbConn, err := db.NewPostgresDB(cfg.DBURL)
+		if err != nil {
+			log.Fatal("Failed to connect to database", "error", err)
+		}
+		if err := userDB.Migrate(dbConn); err != nil {
+			log.Fatal("Failed to run migrations", "error", err)
+		}
+		log.Info("User schema migrations completed")
+	}
+
+	dbConn, err := userDB.NewPostgresDB(cfg.DBURL)
 	if err != nil {
 		log.Fatal("Failed to connect to database", "error", err)
 	}
