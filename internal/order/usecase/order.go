@@ -7,15 +7,18 @@ import (
 	"github.com/AAteddy/go-ecommerce-app/internal/pkg/errors"
 	"github.com/AAteddy/go-ecommerce-app/internal/pkg/logging"
 	"github.com/AAteddy/go-ecommerce-app/internal/pkg/middleware"
+	"github.com/AAteddy/go-ecommerce-app/internal/product/repository"
+	"github.com/google/uuid"
 )
 
 type OrderUseCase struct {
-	repo OrderRepository
-	log  *logging.Logger
+	repo        OrderRepository
+	productRepo repository.ProductRepository
+	log         *logging.Logger
 }
 
-func NewOrderUseCase(repo OrderRepository, log *logging.Logger) *OrderUseCase {
-	return &OrderUseCase{repo, log}
+func NewOrderUseCase(repo OrderRepository, productRepo repository.ProductRepository, log *logging.Logger) *OrderUseCase {
+	return &OrderUseCase{repo, productRepo, log}
 }
 
 type CreateOrderRequest struct {
@@ -25,15 +28,33 @@ type CreateOrderRequest struct {
 }
 
 func (uc *OrderUseCase) CreateOrder(ctx context.Context, req CreateOrderRequest) (string, error) {
-	userID, ok := ctx.Value(middleware.UserIDKey).(string)
-	if !ok || userID == "" {
+	userID, ok := ctx.Value(middleware.UserIDKey).(uuid.UUID)
+	if !ok || userID == uuid.Nil {
 		uc.log.Error("Invalid or missing user_id in context")
 		return "", errors.ErrInvalidInput
 	}
 
-	uc.log.Info("Creating new order for user ", "user_id ", userID)
-
 	productIDs := req.ProductIDs
+	// Validate ProductIDs
+	for _, pid := range productIDs {
+		_, err := uuid.Parse(pid)
+		if err != nil {
+			uc.log.Error("Invalid product_id format", "product_id", pid, "error", err)
+			return "", errors.ErrInvalidInput
+		}
+		// Check if product exists
+		exists, err := uc.productRepo.Exists(ctx, pid)
+		if err != nil {
+			uc.log.Error("Failed to check if product exists", "product_id", pid, "error", err)
+			return "", errors.Wrap(err, "Failed to validate product")
+		}
+		if !exists {
+			uc.log.Error("Product does not exist", "product_id", pid)
+			return "", errors.ErrNotFound
+		}
+	}
+
+	uc.log.Info("Creating order", "user_id", userID, "product_ids", productIDs)
 
 	order, err := domain.NewOrder(userID, productIDs, req.Total, req.Quantity)
 	if err != nil {

@@ -94,3 +94,13 @@ func (r *PostgresProductRepository) Delete(ctx context.Context, id string) error
 	}
 	return nil
 }
+
+func (r *PostgresProductRepository) Exists(ctx context.Context, id string) (bool, error) {
+	var count int64
+	err := r.db.WithContext(ctx).Model(&domain.Product{}).Where("id = ?", id).Count(&count).Error
+	if err != nil {
+		return false, err
+	}
+
+	return count > 0, nil
+}

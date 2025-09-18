@@ -109,7 +109,7 @@ func (a *StringArray) UnmarshalJSON(data []byte) error {
 // Order represents an e-commerce order.
 type Order struct {
 	ID         uuid.UUID   `json:"id" gorm:"type:uuid;primaryKey;default:gen_random_uuid()"`
-	UserID     string      `json:"user_id" gorm:"type:text;not null"`
+	UserID     uuid.UUID   `json:"user_id" gorm:"type:uuid;not null"`
 	ProductIDs StringArray `json:"product_id" gorm:"type:text[]; not null"`
 	Quantity   int         `json:"quantity" gorm:"not null;default:1"`
 	Total      float64     `json:"total" gorm:"type:decimal(10,2);not null;default:0.00"`
@@ -119,9 +119,9 @@ type Order struct {
 }
 
 // NewOrder validates and creates a new order.
-func NewOrder(userID string, productIDs []string, total float64, quantity int) (*Order, error) {
+func NewOrder(userID uuid.UUID, productIDs []string, total float64, quantity int) (*Order, error) {
 	// Validate input
-	if userID == "" || len(productIDs) == 0 || total <= 0 || quantity <= 0 {
+	if userID == uuid.Nil || len(productIDs) == 0 || total <= 0 || quantity <= 0 {
 		return nil, errors.ErrInvalidInput
 	}
 

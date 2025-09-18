@@ -6,6 +6,7 @@ import (
 	"github.com/AAteddy/go-ecommerce-app/internal/payment/domain"
 	"github.com/AAteddy/go-ecommerce-app/internal/pkg/errors"
 	"github.com/AAteddy/go-ecommerce-app/internal/pkg/logging"
+	"github.com/google/uuid"
 )
 
 type PaymentUseCase struct {
@@ -24,11 +25,11 @@ type CreatePaymentRequest struct {
 
 func (uc *PaymentUseCase) CreatePayment(ctx context.Context, req CreatePaymentRequest) (*domain.Payment, error) {
 	uc.log.Info("Creating new payment for order ", "order_id ", req.OrderID)
-	orderID := req.OrderID
-	// if err != nil {
-	// 	uc.log.Error("Invalid order ID", "error", err)
-	// 	return nil, errors.ErrInvalidInput
-	// }
+	orderID, err := uuid.Parse(req.OrderID)
+	if err != nil {
+		uc.log.Error("Invalid order ID", "error", err)
+		return nil, errors.ErrInvalidInput
+	}
 
 	payment, err := domain.NewPayment(orderID, req.Amount)
 	if err != nil {

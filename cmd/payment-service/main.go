@@ -2,12 +2,10 @@ package main
 
 import (
 	"net/http"
-	"os"
 
 	"github.com/go-chi/chi/v5"
 
 	paymentHttp "github.com/AAteddy/go-ecommerce-app/internal/payment/delivery/http"
-	paymentDB "github.com/AAteddy/go-ecommerce-app/internal/payment/infrastructure/db"
 	"github.com/AAteddy/go-ecommerce-app/internal/payment/repository"
 	"github.com/AAteddy/go-ecommerce-app/internal/payment/usecase"
 	"github.com/AAteddy/go-ecommerce-app/internal/pkg/config"
@@ -24,16 +22,16 @@ func main() {
 
 	log.Info("Initializing Payment Service")
 
-	if os.Getenv("RUN_MIGRATIONS") == "true" {
-		dbConn, err := db.NewPostgresDB(cfg.DBURL)
-		if err != nil {
-			log.Fatal("Failed to connect to database", "error", err)
-		}
-		if err := paymentDB.Migrate(dbConn); err != nil {
-			log.Fatal("Failed to run migrations", "error", err)
-		}
-		log.Info("Payment schema migrations completed")
-	}
+	// if os.Getenv("RUN_MIGRATIONS") == "true" {
+	// 	dbConn, err := db.NewPostgresDB(cfg.DBURL)
+	// 	if err != nil {
+	// 		log.Fatal("Failed to connect to database", "error", err)
+	// 	}
+	// 	if err := paymentDB.Migrate(dbConn); err != nil {
+	// 		log.Fatal("Failed to run migrations", "error", err)
+	// 	}
+	// 	log.Info("Payment schema migrations completed")
+	// }
 
 	dbConn, err := db.NewPostgresDB(cfg.DBURL)
 	if err != nil {

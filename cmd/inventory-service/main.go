@@ -2,12 +2,10 @@ package main
 
 import (
 	"net/http"
-	"os"
 
 	"github.com/go-chi/chi/v5"
 
 	inventoryHttp "github.com/AAteddy/go-ecommerce-app/internal/inventory/delivery/http"
-	inventoryDB "github.com/AAteddy/go-ecommerce-app/internal/inventory/infrastructure/db"
 	"github.com/AAteddy/go-ecommerce-app/internal/inventory/repository"
 	"github.com/AAteddy/go-ecommerce-app/internal/inventory/usecase"
 	"github.com/AAteddy/go-ecommerce-app/internal/pkg/config"
@@ -24,16 +22,16 @@ func main() {
 
 	log.Info("Initializing Inventory Service")
 
-	if os.Getenv("RUN_MIGRATIONS") == "true" {
-		dbConn, err := db.NewPostgresDB(cfg.DBURL)
-		if err != nil {
-			log.Fatal("Failed to connect to database", "error", err)
-		}
-		if err := inventoryDB.Migrate(dbConn); err != nil {
-			log.Fatal("Failed to run migrations", "error", err)
-		}
-		log.Info("Inventory schema migrations completed")
-	}
+	// if os.Getenv("RUN_MIGRATIONS") == "true" {
+	// 	dbConn, err := db.NewPostgresDB(cfg.DBURL)
+	// 	if err != nil {
+	// 		log.Fatal("Failed to connect to database", "error", err)
+	// 	}
+	// 	if err := inventoryDB.Migrate(dbConn); err != nil {
+	// 		log.Fatal("Failed to run migrations", "error", err)
+	// 	}
+	// 	log.Info("Inventory schema migrations completed")
+	// }
 
 	dbConn, err := db.NewPostgresDB(cfg.DBURL)
 	if err != nil {

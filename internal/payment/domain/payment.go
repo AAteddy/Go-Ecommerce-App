@@ -10,7 +10,7 @@ import (
 // Payment represents the core business entity for a payment.
 type Payment struct {
 	ID        uuid.UUID `json:"id" gorm:"type:uuid;primaryKey"`
-	OrderID   string    `json:"order_id" gorm:"type:text;not null"`
+	OrderID   uuid.UUID `json:"order_id" gorm:"type:uuid;not null"`
 	Amount    float64   `json:"amount" gorm:"not null;type:decimal(10,2)"`
 	Status    string    `json:"status" gorm:"not null;size:50"` // e.g., "pending", "completed"
 	CreatedAt time.Time `json:"created_at" gorm:"autoCreateTime"`
@@ -18,8 +18,8 @@ type Payment struct {
 }
 
 // NewPayment creates a new payment with validation.
-func NewPayment(orderID string, amount float64) (*Payment, error) {
-	if orderID == "" || amount <= 0 {
+func NewPayment(orderID uuid.UUID, amount float64) (*Payment, error) {
+	if orderID == uuid.Nil || amount <= 0 {
 		return nil, errors.ErrInvalidInput
 	}
 
