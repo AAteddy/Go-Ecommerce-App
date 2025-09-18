@@ -11,8 +11,8 @@ import (
 	"github.com/AAteddy/go-ecommerce-app/internal/pkg/logging"
 	userhttp "github.com/AAteddy/go-ecommerce-app/internal/user/delivery/http"
 
-	"github.com/AAteddy/go-ecommerce-app/internal/user/infrastructure/redis"
 	userDB "github.com/AAteddy/go-ecommerce-app/internal/user/infrastructure/db"
+	"github.com/AAteddy/go-ecommerce-app/internal/user/infrastructure/redis"
 	"github.com/AAteddy/go-ecommerce-app/internal/user/repository"
 	"github.com/AAteddy/go-ecommerce-app/internal/user/usecase"
 )
@@ -29,11 +29,8 @@ func main() {
 	// }
 
 	if os.Getenv("RUN_MIGRATIONS") == "true" {
-		dbConn, err := db.NewPostgresDB(cfg.DBURL)
+		_, err := db.Migrate(cfg.DBURL)
 		if err != nil {
-			log.Fatal("Failed to connect to database", "error", err)
-		}
-		if err := userDB.Migrate(dbConn); err != nil {
 			log.Fatal("Failed to run migrations", "error", err)
 		}
 		log.Info("User schema migrations completed")
